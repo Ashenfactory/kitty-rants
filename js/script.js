@@ -1,6 +1,6 @@
 "use strict";
 
-const baseurl = '/kitty-rants';
+const baseurl = '/kitty-rants/';
 
 const categories = {
 	'Kingdom Hearts': 'An inconsistent chronicle on an inconsistent series of games'
@@ -10,7 +10,7 @@ const rants = [
 	{
 		title: 'Birth by Sleep, part 1',
 		file: 'kh-bbs-p1.md',
-		uri: '/birth-by-sleep-part-1',
+		uri: 'birth-by-sleep-part-1',
 		category: 'Kingdom Hearts',
 		description: 'The beginning of Birth by Sleep and my first forray into the part of the series I\'ve no prior experience with. Excitement and confusion abounds!',
 		date: new Date('2022-09-08')
@@ -18,7 +18,7 @@ const rants = [
 	{
 		title: 'Birth by Sleep, part 2',
 		file: 'kh-bbs-p2.md',
-		uri: '/birth-by-sleep-part-2',
+		uri: 'birth-by-sleep-part-2',
 		category: 'Kingdom Hearts',
 		description: 'Getting into Ventus\'s part of the game and properly finding my bearings mechanically while floundering to come to grips with the metaphysics',
 		date: new Date('2022-09-12')
@@ -26,7 +26,7 @@ const rants = [
 	{
 		title: 'Birth by Sleep, part 3',
 		file: 'kh-bbs-p3.md',
-		uri: '/birth-by-sleep-part-3',
+		uri: 'birth-by-sleep-part-3',
 		category: 'Kingdom Hearts',
 		description: 'Making my way through Aqua\'s story, the last third of the main game. The usual mixture of things I like and things that greatly baffle me ensue',
 		date: new Date('2022-09-16')
@@ -34,7 +34,7 @@ const rants = [
 	{
 		title: 'Birth by Sleep, part 4',
 		file: 'kh-bbs-p4.md',
-		uri: '/birth-by-sleep-part-4',
+		uri: 'birth-by-sleep-part-4',
 		category: 'Kingdom Hearts',
 		description: 'Rounding out the Birth by Sleep playthrough with a lethal dosage of grinding to get the secret ending and sharing my overall thoughts of the game',
 		date: new Date('2022-09-29')
@@ -42,7 +42,7 @@ const rants = [
 	{
 		title: 'Re:Coded, part 1',
 		file: 'kh-rc-p1.md',
-		uri: '/re-coded-part-1',
+		uri: 're-coded-part-1',
 		category: 'Kingdom Hearts',
 		description: 'The series reaches new heights in terms of bizarre narrative decisions and ludicrous world-building. Give it up for Re:Coded everyone!',
 		date: new Date('2022-10-02')
@@ -50,7 +50,7 @@ const rants = [
 	{
 		title: 'Re:Coded, part 2',
 		file: 'kh-rc-p2.md',
-		uri: '/re-coded-part-2',
+		uri: 're-coded-part-2',
 		category: 'Kingdom Hearts',
 		description: 'The exciting conclusion to this not-quite-a-movie and the introduction of the plot point that originally killed my interest in the series for about ten years!',
 		date: new Date('2022-10-08')
@@ -58,7 +58,7 @@ const rants = [
 	{
 		title: 'Dream Drop Distance, part 1',
 		file: 'kh-ddd-p1.md',
-		uri: '/dream-drop-distance-part-1',
+		uri: 'dream-drop-distance-part-1',
 		category: 'Kingdom Hearts',
 		description: 'Once more, I find myself overwhelmed by strange new mechanics in this next handheld entry in the series which features a constant ticking clock element!',
 		date: new Date('2022-10-08 12:00:00')
@@ -66,7 +66,7 @@ const rants = [
 	{
 		title: 'Dream Drop Distance, part 2',
 		file: 'kh-ddd-p2.md',
-		uri: '/dream-drop-distance-part-2',
+		uri: 'dream-drop-distance-part-2',
 		category: 'Kingdom Hearts',
 		description: 'Two relatively short updates, covering only the Hunchback of Notre Dame world from both Sora\'s and Riku\'s perspectives',
 		date: new Date('2022-10-11')
@@ -74,7 +74,7 @@ const rants = [
 	{
 		title: 'Dream Drop Distance, part 3',
 		file: 'kh-ddd-p3.md',
-		uri: '/dream-drop-distance-part-3',
+		uri: 'dream-drop-distance-part-3',
 		category: 'Kingdom Hearts',
 		description: 'I cover everything leading up to the last world only to stop the update short before what I was actually going to talk about to temporarily save my sanity',
 		date: new Date('2022-11-02')
@@ -82,7 +82,7 @@ const rants = [
 	{
 		title: 'Dream Drop Distance, part 4',
 		file: 'kh-ddd-p4.md',
-		uri: '/dream-drop-distance-part-4',
+		uri: 'dream-drop-distance-part-4',
 		category: 'Kingdom Hearts',
 		description: 'This it is, the actual moment Kingdom Hearts truly snaps and breaks off into utter nonsense, locking itself into what would eventually become Kingdom Hearts III',
 		date: new Date('2022-11-07')
@@ -90,7 +90,7 @@ const rants = [
 	{
 		title: 'Kingdom Hearts 0.2',
 		file: 'kh-02.md',
-		uri: '/kingdom-hearts-02',
+		uri: 'kingdom-hearts-02',
 		category: 'Kingdom Hearts',
 		description: 'A short and sweet return to relative normalcy after the spiraling insanity of everything that\'s been happening since Kingdom Hearts II',
 		date: new Date('2022-11-14')
@@ -98,7 +98,7 @@ const rants = [
 	{
 		title: 'Kingdom Hearts χ, part 1',
 		file: 'kh-chi-p1.md',
-		uri: '/kingdom-hearts-chi-part-1',
+		uri: 'kingdom-hearts-chi-part-1',
 		category: 'Kingdom Hearts',
 		description: 'Here is my attempt at building a tower from the pile of sand that is the story of the first iteration of Kingdom Hearts χ and Back Cover',
 		date: new Date('2022-11-20')
@@ -106,7 +106,7 @@ const rants = [
 	{
 		title: 'Kingdom Hearts χ, part 2',
 		file: 'kh-chi-p2.md',
-		uri: '/kingdom-hearts-chi-part-2',
+		uri: 'kingdom-hearts-chi-part-2',
 		category: 'Kingdom Hearts',
 		description: 'Things somehow get simultaneously both more and less clear as we go on as the story sees how many mystery boxes it can juggle at once',
 		date: new Date('2022-12-14')
@@ -114,7 +114,7 @@ const rants = [
 	{
 		title: 'Kingdom Hearts III, part 1',
 		file: 'kh-3-p1.md',
-		uri: '/kingdom-hearts-iii-part-1',
+		uri: 'kingdom-hearts-iii-part-1',
 		category: 'Kingdom Hearts',
 		description: 'The playthrough project finally reaches the infamous third numbered entry of the series and the quest to figure out what went wrong begins',
 		date: new Date('2023-03-01')
@@ -122,7 +122,7 @@ const rants = [
 	{
 		title: 'Kingdom Hearts III, part 2',
 		file: 'kh-3-p2.md',
-		uri: '/kingdom-hearts-iii-part-2',
+		uri: 'kingdom-hearts-iii-part-2',
 		category: 'Kingdom Hearts',
 		description: 'The extent of the disapointment is laid bare at last and an attempt is made at the impossible task of drawing some kind of conclusion from it all',
 		date: new Date('2023-03-30')
@@ -171,7 +171,7 @@ function getArticle(uri) {
 		const rant = rants.find(rant => baseurl + rant.uri === uri);
 
 		if (rant) {
-			const request = new Request('/rants/' + rant.file);
+			const request = new Request(baseurl + 'rants/' + rant.file);
 
 			fetch(request).then(response => {
 				if (!response.ok) {
