@@ -388,8 +388,14 @@ addEventListener('beforeunload', () => {
 	sessionStorage.setItem('scrollpos', scrollY);
 });
 
+let throttle = false;
+
 addEventListener('scroll', () => {
 	setTimeout(() => {
 		history.replaceState({scrollY: scrollY}, null, location.href);
+
+		throttle = false;
 	}, 1000);
+
+	throttle = true;
 });
