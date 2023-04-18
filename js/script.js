@@ -133,12 +133,12 @@ function updateMeta(content) {
 	const title = (content.title ? content.title + ' | ' : '') + 'Kitty Rants';
 
 	document.title = title
-	document.head.querySelector('meta[property="og:title"]').setAttribute('content', title);
-	document.head.querySelector('meta[property="og:description"]').setAttribute('content', content.description ?? 'A dumping ground for reckless verbiage and confused babblings');
-	document.head.querySelector('meta[property="og:url"]').setAttribute('content', location.origin + location.pathname);
-	document.head.querySelector('meta[property="og:type"]').setAttribute('content', content.type ?? 'website');
+	document.head.querySelector('meta[property="og:title"]').content = title;
+	document.head.querySelector('meta[property="og:description"]').content = content.description ?? 'A dumping ground for reckless verbiage and confused babblings';
+	document.head.querySelector('meta[property="og:type"]').content = content.type ?? 'website';
 
 	document.head.querySelector('link[rel="canonical"]')?.remove();
+	document.head.querySelector('meta[property="og:url"]')?.remove();
 
 	if (content.canonical) {
 		const canonical = document.createElement('link');
@@ -146,6 +146,10 @@ function updateMeta(content) {
 		canonical.href = content.canonical;
 
 		document.head.appendChild(canonical);
+
+		const ogURL = document.createElement('meta');
+		ogURL.setAttribute('property', 'og:url');
+		ogURL.content = content.canonical;
 	}
 
 	document.head.querySelector('script[type="application/ld+json"]')?.remove();
@@ -162,12 +166,18 @@ function updateMeta(content) {
 const mainElement = document.querySelector('main');
 const navElement = document.querySelector('nav');
 
-const reducedMotion = matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches === true;
 
 const dtf = new Intl.DateTimeFormat('en-GB', {year: 'numeric', month: 'long', day: 'numeric'});
 
-function getArticle(uri) {
+function setPage(uri) {
 	return new Promise(resolve => {
+		if (uri === baseurl) {
+			frontPage();
+
+			return resolve('frontpage');
+		}
+
 		const rant = rants.find(rant => baseurl + rant.uri === uri);
 
 		if (rant) {
@@ -177,28 +187,21 @@ function getArticle(uri) {
 				if (!response.ok) {
 					errorPage();
 
-					resolve(true);
+					return resolve('error');
 				} else {
-					document.title = rant.title + ' | Kitty Rants';
-
-					let content = '<article><header><h1>' + rant.title.replace(/,(.*?)$/, ' <small>$1</small>') + '</h1>';
+					document.title = `${rant.title} | Kitty Rants`;
 					let dateString = dtf.format(rant.date);
 
-					switch (rant.date.getDate() % 10) {
-						case '1':
-							dateString = dateString.replace(/^(\d+)/, '$1st of');
-							break;
-						case '2':
-							dateString = dateString.replace(/^(\d+)/, '$1nd of');
-							break;
-						case '3':
-							dateString = dateString.replace(/^(\d+)/, '$1rd of');
-							break;
-						default:
-							dateString = dateString.replace(/^(\d+)/, '$1th of');
-					}
+					const day = rant.date.getDate();
+					const suffix = ['th', 'st', 'nd', 'rd'][(day > 10 && day < 14) ? 0 : day % 10];
 
-					content += '<p class="timestamp">A ' + rant.category + ' rant, written <time datetime="' + rant.date.toISOString().slice(0, 10) + '">' + dateString + '</time></p></header>';
+					dateString = dateString.replace(/^(\d+)/, `$1${suffix} of`);
+
+					let content = `<article>
+						<header>
+							<h1>${rant.title.replace(/,(.*?)$/, ' <small>$1</small>')}</h1>
+							<p class="timestamp">A ${rant.category} rant, written <time datetime="${rant.date.toISOString()}">${dateString}</time></p>
+						</header>`;
 
 					response.text().then(text => {
 						let sectionIndex = 0;
@@ -222,7 +225,7 @@ function getArticle(uri) {
 							title: rant.title,
 							description: description,
 							type: 'article',
-							canonical: location.origin + rant.uri,
+							canonical: location.origin + baseurl + rant.uri,
 							jsonLD: JSON.stringify({
 								'@context': 'https://schema.org',
 								'@type': 'BlogPosting',
@@ -237,7 +240,7 @@ function getArticle(uri) {
 										url: 'https://github.com/Ashenfactory'
 									}
 								],
-								url: location.origin + rant.uri
+								url: location.origin + baseurl + rant.uri
 							}),
 						});
 
@@ -253,32 +256,36 @@ function getArticle(uri) {
 							content += '<nav class="footer-navigation">';
 
 							if (rantIndex > 0) {
-								content += '<a rel="prev" href="' + baseurl + categoryRants[rantIndex - 1].uri + '"><small>Previous Rant</small><span>' + categoryRants[rantIndex - 1].title + '</span></a>';
+								content += `<a rel="prev" href="${baseurl + categoryRants[rantIndex - 1].uri}"><small>Previous Rant</small><span>${categoryRants[rantIndex - 1].title}</span></a>`;
 							}
 
 							if (rantIndex < categoryRants.length - 1) {
-								content += '<a rel="next" href="' + baseurl + categoryRants[rantIndex + 1].uri + '"><small>Next Rant</small><span>' + categoryRants[rantIndex + 1].title + '</span></a>';
+								content += `<a rel="next" href="${baseurl + categoryRants[rantIndex + 1].uri}"><small>Next Rant</small><span>${categoryRants[rantIndex + 1].title}</span></a>`;
 							}
 
 							content += '</nav>';
 						}
 
-						mainElement.dataset.page = 'article';
-						mainElement.innerHTML = content + '</article><footer><a class="top-link" href="#top">Back to top?</a></footer>';
+						mainElement.innerHTML = `${content}<footer><a class="top-link" href="#top">Back to top?</a></footer>`;
 
-						mainElement.classList.remove('loading');
-
-						resolve(true);
+						return resolve('article');
 					});
 
-					navElement.innerHTML = '<ol><li><a href="' + baseurl + '">Kitty Rants</a></li><li><a href="' + baseurl + '#' + rant.category.toLowerCase().replaceAll(' ', '-') + '">' + rant.category + '</a></li><li aria-current="page">' + rant.title + '</li></ol>';
-
+					navElement.innerHTML = `<ol>
+						<li>
+							<a href="${baseurl}">Kitty Rants</a>
+						</li>
+						<li>
+							<a href="${baseurl + '#' + rant.category.toLowerCase().replaceAll(' ', '-')}">${rant.category}</a>
+						</li>
+						<li aria-current="page">${rant.title}</li>
+					</ol>`;
 				}
 			});
 		} else {
 			errorPage();
 
-			resolve(true);
+			return resolve('error');
 		}
 	});
 }
@@ -288,16 +295,21 @@ function errorPage() {
 		title: 'Error!'
 	});
 
-	mainElement.dataset.page = 'error';
-	navElement.innerHTML = '<ol><li><a href="' + baseurl + '">Kitty Rants</a></li><li aria-current="page">Error</li></ol>';
-	mainElement.innerHTML = '<h1>Rant not found!</h1><p>It seems like I\'ve got nothing to say on <em>that</em> matter yet. Or maybe I used to, but then changed my mind later on?</p><p>At any rate, you can try going to the <a href="' + baseurl + '">frontpage</a> to see if anything there catches your fancy.</p>';
+	navElement.innerHTML = `<ol>
+		<li>
+			<a href="${baseurl}">Kitty Rants</a>
+		</li>
+			<li aria-current="page">Error</li>
+		</ol>`;
 
-	mainElement.classList.remove('loading');
+	mainElement.innerHTML = `<h1>Rant not found!</h1>
+	<p>It seems like I've got nothing to say on <em>that</em> matter yet. Or maybe I used to, but then changed my mind later on?</p>
+	<p>At any rate, you can try going to the <a href="${baseurl}">frontpage</a> to see if anything there catches your fancy.</p>`;
 }
 
 function frontPage() {
 	updateMeta({
-		canonical: location.origin + location.pathname
+		canonical: location.origin + baseurl
 	});
 
 	let content = '<h1>Kitty Rants</h1>';
@@ -306,57 +318,68 @@ function frontPage() {
 
 	const latestRant = rants.reduce((a, b) => a.date > b.date ? a : b);
 
-	content += '<section><h2>Latest Rant</h2><article><h3><a href="' + baseurl + latestRant.uri + '">' + latestRant.title + '</a></h3><time class="timestamp" datetime="' + latestRant.date.toISOString() + '">' + dtf.format(latestRant.date) + '</time>' + (latestRant.description ? '<p>' + latestRant.description + '</p>' : '') + '</article>';
+	content += `<section>
+		<h2>Latest Rant</h2>
+		<article>
+			<h3><a href="${baseurl + latestRant.uri}">${latestRant.title}</a></h3>
+			<time class="timestamp" datetime="${latestRant.date.toISOString()}">${dtf.format(latestRant.date)}</time>
+			${latestRant.description ? `<p>${latestRant.description}</p>` : ''}
+		</article>`;
 
 	let currentCategory;
 
 	rants.forEach(rant => {
 		if (currentCategory !== rant.category) {
 			currentCategory = rant.category;
-			content += '</section><section id="' + currentCategory.toLowerCase().replaceAll(' ', '-') + '"><h2>' + currentCategory + '</h2>';
+			content += `</section>
+			<section id="${currentCategory.toLowerCase().replaceAll(' ', '-')}">
+				<h2>${currentCategory}</h2>`;
 
 			if (categories[currentCategory]) {
-				content += '<p class="lead">' + categories[currentCategory] + '</p>';
+				content += `<p class="lead">${categories[currentCategory]}</p>`;
 			}
 		}
 
-		content += '<article><h3><a href="' + baseurl + rant.uri + '">' + rant.title + '</a></h3><time class="timestamp" datetime="' + rant.date.toISOString().slice(0, 10) + '">' + dtf.format(rant.date) + '</time>' + (rant.description ? '<p>' + rant.description + '</p>' : '') + '</article>';
+		content += `<article>
+			<h3><a href="${baseurl + rant.uri}">${rant.title}</a></h3>
+			<time class="timestamp" datetime="${rant.date.toISOString()}">${dtf.format(rant.date)}</time>
+			${rant.description ? `<p>${rant.description}</p>` : ''}
+		</article>`;
 	});
 
-	mainElement.dataset.page = 'frontpage';
-	mainElement.innerHTML = content += '</section><footer><a class="top-link" href="#top">Back to top?</a></footer>';
-	navElement.innerHTML = '<ol><li aria-current="page">Kitty Rants</li></ol>';
+	mainElement.innerHTML = content += `</section>
+	<footer>
+		<a class="top-link" href="#top">Back to top?</a>
+	</footer>`;
 
-	mainElement.classList.remove('loading');
+	navElement.innerHTML = `<ol>
+		<li aria-current="page">Kitty Rants</li>
+	</ol>`;
 }
 
-function setPage(uri, state = null, initial = false) {
+function newPage(uri, state = null, initial = false) {
 	mainElement.classList.add('loading');
-	mainElement.innerHTML = '';
 
-	if (uri === baseurl) {
-		frontPage();
-
+	setPage(uri).then(page => {
 		if (initial) {
 			scroll(0, sessionStorage.getItem('scrollpos') ?? 0);
+		} else if (location.hash) {
+			setTimeout(() => {
+				document.querySelector(location.hash)?.scrollIntoView();
+			});
 		} else {
 			scroll(0, state?.scrollY ?? 0);
 		}
-	} else {
-		getArticle(uri).then(() => {
-			if (initial) {
-				scroll(0, sessionStorage.getItem('scrollpos') ?? 0);
-			} else {
-				scroll(0, state?.scrollY ?? 0);
-			}
-		});
-	}
+
+		mainElement.dataset.page = page;
+		mainElement.classList.remove('loading');
+	});
 }
 
-setPage(location.pathname, null, true);
+newPage(location.pathname, null, true);
 
 addEventListener('popstate', (event, state) => {
-	setPage(location.pathname, event.state);
+	newPage(location.pathname, event.state);
 });
 
 document.addEventListener('click', event => {
@@ -366,19 +389,11 @@ document.addEventListener('click', event => {
 		if (event.target.classList.contains('top-link')) {
 			scroll({top: 0, left: 0, behavior: reducedMotion ? 'auto' : 'smooth'});
 		} else {
-			const differentPage = event.target.pathname !== location.pathname;
-
 			history.replaceState({scrollY: scrollY}, null, location.href);
 
-			if (differentPage) {
+			if (event.target.pathname !== location.pathname) {
+				newPage(event.target.pathname);
 				history.pushState(null, null, event.target.href);
-				setPage(event.target.pathname);
-			}
-
-			if (event.target.hash) {
-				document.querySelector(event.target.hash).scrollIntoView({behavior: (reducedMotion || differentPage) ? 'auto' : 'smooth'});
-			} else {
-				scroll(0, 0);
 			}
 		}
 	}
@@ -391,11 +406,13 @@ addEventListener('beforeunload', () => {
 let throttle = false;
 
 addEventListener('scroll', () => {
-	setTimeout(() => {
-		history.replaceState({scrollY: scrollY}, null, location.href);
+	if (!throttle) {
+		setTimeout(() => {
+			history.replaceState({scrollY: scrollY}, null, location.href);
 
-		throttle = false;
-	}, 1000);
+			throttle = false;
+		}, 250);
+	}
 
 	throttle = true;
 });
