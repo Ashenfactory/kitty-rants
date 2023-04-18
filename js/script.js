@@ -356,7 +356,7 @@ function setPage(uri, state = null, initial = false) {
 setPage(location.pathname, null, true);
 
 addEventListener('popstate', (event, state) => {
-	setPage(location.pathname, event.state)
+	setPage(location.pathname, event.state);
 });
 
 document.addEventListener('click', event => {
@@ -381,11 +381,15 @@ document.addEventListener('click', event => {
 				scroll(0, 0);
 			}
 		}
-
 	}
-
 });
 
 addEventListener('beforeunload', () => {
 	sessionStorage.setItem('scrollpos', scrollY);
+});
+
+addEventListener('scroll', () => {
+	setTimeout(() => {
+		history.replaceState({scrollY: scrollY}, null, location.href);
+	}, 1000);
 });
