@@ -193,7 +193,7 @@ function setPage(uri) {
 					let dateString = dtf.format(rant.date);
 
 					const day = rant.date.getDate();
-					const suffix = ['th', 'st', 'nd', 'rd'][(day > 10 && day < 14) ? 0 : day % 10];
+					const suffix = ['th', 'st', 'nd', 'rd'][(day > 3 && day < 21) ? 0 : day % 10] || 'th';
 
 					dateString = dateString.replace(/^(\d+)/, `$1${suffix} of`);
 
