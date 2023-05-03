@@ -197,11 +197,7 @@ function setPage(uri) {
 
 					dateString = dateString.replace(/^(\d+)/, `$1${suffix} of`);
 
-					let content = `<article>
-						<header>
-							<h1>${rant.title.replace(/,(.*?)$/, ' <small>$1</small>')}</h1>
-							<p class="timestamp">A ${rant.category} rant, written <time datetime="${rant.date.toISOString()}">${dateString}</time></p>
-						</header>`;
+					let content = `<article><header><h1>${rant.title.replace(/,(.*?)$/, ' <small>$1</small>')}</h1><p class="timestamp">A ${rant.category} rant, written <time datetime="${rant.date.toISOString()}">${dateString}</time></p></header>`;
 
 					response.text().then(text => {
 						let sectionIndex = 0;
@@ -224,12 +220,11 @@ function setPage(uri) {
 						updateMeta({
 							title: rant.title,
 							description: description,
-							type: 'article',
-							canonical: location.origin + baseurl + rant.uri,
 							jsonLD: JSON.stringify({
 								'@context': 'https://schema.org',
 								'@type': 'BlogPosting',
 								headline: rant.title,
+								url: location.origin + baseurl + rant.uri,
 								datePublished: rant.date.toISOString(),
 								dateCreated: rant.date.toISOString(),
 								description: description,
@@ -239,9 +234,10 @@ function setPage(uri) {
 										name: 'DoomKitty3000',
 										url: 'https://github.com/Ashenfactory'
 									}
-								],
-								url: location.origin + baseurl + rant.uri
+								]
 							}),
+							canonical: location.origin + baseurl + rant.uri,
+							type: 'article'
 						});
 
 						content += '</article>';
@@ -271,15 +267,7 @@ function setPage(uri) {
 						return resolve('article');
 					});
 
-					navElement.innerHTML = `<ol>
-						<li>
-							<a href="${baseurl}">Kitty Rants</a>
-						</li>
-						<li>
-							<a href="${baseurl + '#' + rant.category.toLowerCase().replaceAll(' ', '-')}">${rant.category}</a>
-						</li>
-						<li aria-current="page">${rant.title}</li>
-					</ol>`;
+					navElement.innerHTML = `<ol><li><a href="${baseurl}">Kitty Rants</a></li><li><a href="${baseurl}#${rant.category.toLowerCase().replaceAll(' ', '-')}">${rant.category}</a></li><li aria-current="page">${rant.title}</li></ol>`;
 				}
 			});
 		} else {
@@ -295,16 +283,8 @@ function errorPage() {
 		title: 'Error!'
 	});
 
-	navElement.innerHTML = `<ol>
-		<li>
-			<a href="${baseurl}">Kitty Rants</a>
-		</li>
-			<li aria-current="page">Error</li>
-		</ol>`;
-
-	mainElement.innerHTML = `<h1>Rant not found!</h1>
-	<p>It seems like I've got nothing to say on <em>that</em> matter yet. Or maybe I used to, but then changed my mind later on?</p>
-	<p>At any rate, you can try going to the <a href="${baseurl}">frontpage</a> to see if anything there catches your fancy.</p>`;
+	navElement.innerHTML = `<ol><li><a href="${baseurl}">Kitty Rants</a></li><li aria-current="page">Error</li></ol>`;
+	mainElement.innerHTML = `<h1>Rant not found!</h1><p>It seems like I've got nothing to say on <em>that</em> matter yet. Or maybe I used to, but then changed my mind later on?</p><p>At any rate, you can try going to the <a href="${baseurl}">frontpage</a> to see if anything there catches your fancy.</p>`;
 }
 
 function frontPage() {
@@ -312,49 +292,29 @@ function frontPage() {
 		canonical: location.origin + baseurl
 	});
 
-	let content = '<h1>Kitty Rants</h1>';
-
 	rants.sort((a, b) => a.category.localeCompare(b.category) || b.date - a.date);
 
+	let currentCategory;
 	const latestRant = rants.reduce((a, b) => a.date > b.date ? a : b);
 
-	content += `<section>
-		<h2>Latest Rant</h2>
-		<article>
-			<h3><a href="${baseurl + latestRant.uri}">${latestRant.title}</a></h3>
-			<time class="timestamp" datetime="${latestRant.date.toISOString()}">${dtf.format(latestRant.date)}</time>
-			${latestRant.description ? `<p>${latestRant.description}</p>` : ''}
-		</article>`;
-
-	let currentCategory;
+	let content = `<h1>Kitty Rants</h1><section><h2>Latest Rant</h2><article><h3><a href="${baseurl + latestRant.uri}">${latestRant.title}</a></h3><time class="timestamp" datetime="${latestRant.date.toISOString()}">${dtf.format(latestRant.date)}</time>${latestRant.description ? `<p>${latestRant.description}</p>` : ''}</article>`;
 
 	rants.forEach(rant => {
 		if (currentCategory !== rant.category) {
 			currentCategory = rant.category;
-			content += `</section>
-			<section id="${currentCategory.toLowerCase().replaceAll(' ', '-')}">
-				<h2>${currentCategory}</h2>`;
+			content += `</section><section id="${currentCategory.toLowerCase().replaceAll(' ', '-')}"><h2>${currentCategory}</h2>`;
 
 			if (categories[currentCategory]) {
 				content += `<p class="lead">${categories[currentCategory]}</p>`;
 			}
 		}
 
-		content += `<article>
-			<h3><a href="${baseurl + rant.uri}">${rant.title}</a></h3>
-			<time class="timestamp" datetime="${rant.date.toISOString()}">${dtf.format(rant.date)}</time>
-			${rant.description ? `<p>${rant.description}</p>` : ''}
-		</article>`;
+		content += `<article><h3><a href="${baseurl + rant.uri}">${rant.title}</a></h3><time class="timestamp" datetime="${rant.date.toISOString()}">${dtf.format(rant.date)}</time>${rant.description ? `<p>${rant.description}</p>` : ''}</article>`;
 	});
 
-	mainElement.innerHTML = content += `</section>
-	<footer>
-		<a class="top-link" href="#top">Back to top?</a>
-	</footer>`;
+	mainElement.innerHTML = `${content}</section><footer><a class="top-link" href="#top">Back to top?</a></footer>`;
 
-	navElement.innerHTML = `<ol>
-		<li aria-current="page">Kitty Rants</li>
-	</ol>`;
+	navElement.innerHTML = `<ol><li aria-current="page">Kitty Rants</li></ol>`;
 }
 
 function newPage(uri, state = null, initial = false) {

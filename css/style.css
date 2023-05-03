@@ -17,19 +17,27 @@ body {
 }
 
 main {
+	position: relative;
 	max-width: 800px;
 	margin: 3rem auto;
 	padding: 0 1rem;
 	word-break: break-word;
-	transition: opacity .1s ease;
-	background-image: url(../img/happy.png);
-	background-repeat: no-repeat;
-	background-position: bottom right;
-	background-size: 256px;
+	background: no-repeat url(../img/body.png) bottom right / 256px;
 	padding-bottom: 320px;
 	border-bottom: 4px solid #000;
 	box-shadow: 0 4px 0 #333;
 	min-height: calc(100% - 320px - 12rem);
+}
+
+main::after {
+	content: '';
+	position: absolute;
+	bottom: 64px;
+	right: 72px;
+	display: block;
+	height: 56px;
+	width: 112px;
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAAOAQMAAABAa03tAAAABlBMVEUAAAAnBxtdQbaBAAAAAXRSTlMAQObYZgAAAE9JREFUCNdjAALmBww2DDIMzC0MDE4MdgzsJx8wzGRIZuDJEmBYyuDIwKEVwNAKojUnMFSC1LMoMDCB9R1gqGEgCBQcGNjSgLR8AwPnTAYAUnEMT1kzkbkAAAAASUVORK5CYII=) 0 / 224px;
 }
 
 h1,
@@ -52,8 +60,8 @@ nav,
 	font-family: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, Manjari, 'Arial Rounded MT Bold', Calibri, source-sans-pro, sans-serif;
 }
 
-[data-page="error"] {
-	background-image: url(../img/confused.png);
+[data-page="error"]::after {
+	background-position-x: -112px;
 }
 
 [data-page="frontpage"] section {
@@ -71,7 +79,7 @@ nav,
 }
 
 .loading {
-	background: none;
+	min-height: calc(100% - 200px);
 }
 
 li {
