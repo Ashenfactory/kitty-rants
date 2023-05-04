@@ -328,7 +328,7 @@ function newPage(uri, state = null, initial = false) {
 			setTimeout(() => {
 				document.querySelector(location.hash)?.scrollIntoView();
 			});
-		} else {
+		} else if (state) {
 			scroll(0, state?.scrollY ?? 0);
 		}
 
@@ -352,8 +352,9 @@ document.addEventListener('click', event => {
 			history.replaceState({scrollY: scrollY}, null, location.href);
 
 			if (event.target.pathname !== location.pathname) {
-				newPage(event.target.pathname);
 				history.pushState(null, null, event.target.href);
+				scroll(0, 0);
+				newPage(event.target.pathname);
 			}
 		}
 	}
