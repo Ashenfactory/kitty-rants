@@ -79,7 +79,12 @@ nav,
 }
 
 .loading {
-	min-height: calc(100% - 200px);
+	min-height: 100%;
+	background: none;
+}
+
+.loading article header {
+	margin-bottom: 100%;
 }
 
 li {

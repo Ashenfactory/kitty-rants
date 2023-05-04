@@ -175,7 +175,7 @@ function setPage(uri) {
 		if (uri === baseurl) {
 			frontPage();
 
-			return resolve('frontpage');
+			return resolve();
 		}
 
 		const rant = rants.find(rant => baseurl + rant.uri === uri);
@@ -187,32 +187,22 @@ function setPage(uri) {
 				if (!response.ok) {
 					errorPage();
 
-					return resolve('error');
+					return resolve();
 				} else {
-					document.title = `${rant.title} | Kitty Rants`;
-					let dateString = dtf.format(rant.date);
-
-					const day = rant.date.getDate();
-					const suffix = ['th', 'st', 'nd', 'rd'][(day > 3 && day < 21) ? 0 : day % 10] || 'th';
-
-					dateString = dateString.replace(/^(\d+)/, `$1${suffix} of`);
-
-					let content = `<article><header><h1>${rant.title.replace(/,(.*?)$/, ' <small>$1</small>')}</h1><p class="timestamp">A ${rant.category} rant, written <time datetime="${rant.date.toISOString()}">${dateString}</time></p></header>`;
-
 					response.text().then(text => {
 						let sectionIndex = 0;
 
-						content += text.trim()
+						let articleContent = text.trim()
 							.replaceAll(/^a>\s(.*)/gm, '<aside><p>$1</p></aside>')
 							.replaceAll(/^(#{1,6})\s(.*)/gm, (match, p1, p2) => '<section><h' + p1.length + '>' + p2 + '</h' + p1.length + '>')
 							.replaceAll('<section>', match => (sectionIndex++ ? '</section>' : '') + match)
-							.replaceAll(/^([^<\n].*)/gm, '<p>$1</p>')
+							.replaceAll(/^[^<\n].*/gm, '<p>$&</p>')
 							.replaceAll(/^<p>(.+?)<\/p>\n{2,}/gm, '<p class="spacer">$1</p>')
 							.replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
 							.replaceAll(/\*(.*?)\*/g, '<em>$1</em>');
 
 						if (sectionIndex) {
-							content += '</section>';
+							articleContent += '</section>';
 						}
 
 						const description = rant.description ?? (text.substring(0, text.lastIndexOf(' ', 160)).replaceAll(/^>\s/gm, '').replace(/\*/, '') + '…');
@@ -240,40 +230,50 @@ function setPage(uri) {
 							type: 'article'
 						});
 
-						content += '</article>';
+						document.querySelector('article').insertAdjacentHTML('beforeend', articleContent);
 
-						const categoryRants = rants.filter(categoryRant => categoryRant.category === rant.category);
-
-						if (categoryRants.length > 1) {
-							categoryRants.sort((a, b) => a.date - b.date);
-
-							const rantIndex = categoryRants.findIndex(categoryRant => categoryRant.uri === rant.uri);
-
-							content += '<nav class="footer-navigation">';
-
-							if (rantIndex > 0) {
-								content += `<a rel="prev" href="${baseurl + categoryRants[rantIndex - 1].uri}"><small>Previous Rant</small><span>${categoryRants[rantIndex - 1].title}</span></a>`;
-							}
-
-							if (rantIndex < categoryRants.length - 1) {
-								content += `<a rel="next" href="${baseurl + categoryRants[rantIndex + 1].uri}"><small>Next Rant</small><span>${categoryRants[rantIndex + 1].title}</span></a>`;
-							}
-
-							content += '</nav>';
-						}
-
-						mainElement.innerHTML = `${content}<footer><a class="top-link" href="#top">Back to top?</a></footer>`;
-
-						return resolve('article');
+						return resolve();
 					});
-
-					navElement.innerHTML = `<ol><li><a href="${baseurl}">Kitty Rants</a></li><li><a href="${baseurl}#${rant.category.toLowerCase().replaceAll(' ', '-')}">${rant.category}</a></li><li aria-current="page">${rant.title}</li></ol>`;
 				}
 			});
+
+			document.title = `${rant.title} | Kitty Rants`;
+			let dateString = dtf.format(rant.date);
+
+			const day = rant.date.getDate();
+			const suffix = ['th', 'st', 'nd', 'rd'][(day > 3 && day < 21) ? 0 : day % 10] || 'th';
+
+			dateString = dateString.replace(/^\d+/, `$&${suffix} of`);
+
+			let content = `<article><header><h1>${rant.title.replace(/,(.*?)$/, ' <small>$1</small>')}</h1><p class="timestamp">A ${rant.category} rant, written <time datetime="${rant.date.toISOString()}">${dateString}</time></p></header></article>`;
+
+			const categoryRants = rants.filter(categoryRant => categoryRant.category === rant.category);
+
+			if (categoryRants.length > 1) {
+				categoryRants.sort((a, b) => a.date - b.date);
+
+				const rantIndex = categoryRants.findIndex(categoryRant => categoryRant.uri === rant.uri);
+
+				content += '<nav class="footer-navigation">';
+
+				if (rantIndex > 0) {
+					content += `<a rel="prev" href="${baseurl + categoryRants[rantIndex - 1].uri}"><small>Previous Rant</small><span>${categoryRants[rantIndex - 1].title}</span></a>`;
+				}
+
+				if (rantIndex < categoryRants.length - 1) {
+					content += `<a rel="next" href="${baseurl + categoryRants[rantIndex + 1].uri}"><small>Next Rant</small><span>${categoryRants[rantIndex + 1].title}</span></a>`;
+				}
+
+				content += '</nav>';
+			}
+
+			mainElement.dataset.page = 'article';
+			mainElement.innerHTML = `${content}<footer><a class="top-link" href="#top">Back to top?</a></footer>`;
+			navElement.innerHTML = `<ol><li><a href="${baseurl}">Kitty Rants</a></li><li><a href="${baseurl}#${rant.category.toLowerCase().replaceAll(' ', '-')}">${rant.category}</a></li><li aria-current="page">${rant.title}</li></ol>`;
 		} else {
 			errorPage();
 
-			return resolve('error');
+			return resolve();
 		}
 	});
 }
@@ -283,6 +283,7 @@ function errorPage() {
 		title: 'Error!'
 	});
 
+	mainElement.dataset.page = 'error';
 	navElement.innerHTML = `<ol><li><a href="${baseurl}">Kitty Rants</a></li><li aria-current="page">Error</li></ol>`;
 	mainElement.innerHTML = `<h1>Rant not found!</h1><p>It seems like I've got nothing to say on <em>that</em> matter yet. Or maybe I used to, but then changed my mind later on?</p><p>At any rate, you can try going to the <a href="${baseurl}">frontpage</a> to see if anything there catches your fancy.</p>`;
 }
@@ -312,15 +313,15 @@ function frontPage() {
 		content += `<article><h3><a href="${baseurl + rant.uri}">${rant.title}</a></h3><time class="timestamp" datetime="${rant.date.toISOString()}">${dtf.format(rant.date)}</time>${rant.description ? `<p>${rant.description}</p>` : ''}</article>`;
 	});
 
+	mainElement.dataset.page = 'frontpage';
 	mainElement.innerHTML = `${content}</section><footer><a class="top-link" href="#top">Back to top?</a></footer>`;
-
 	navElement.innerHTML = `<ol><li aria-current="page">Kitty Rants</li></ol>`;
 }
 
 function newPage(uri, state = null, initial = false) {
 	mainElement.classList.add('loading');
 
-	setPage(uri).then(page => {
+	setPage(uri).then(() => {
 		if (initial) {
 			scroll(0, sessionStorage.getItem('scrollpos') ?? 0);
 		} else if (location.hash) {
@@ -331,7 +332,6 @@ function newPage(uri, state = null, initial = false) {
 			scroll(0, state?.scrollY ?? 0);
 		}
 
-		mainElement.dataset.page = page;
 		mainElement.classList.remove('loading');
 	});
 }
